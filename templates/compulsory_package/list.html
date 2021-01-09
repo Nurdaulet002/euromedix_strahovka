@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load tariffication_tags %}
+{% block content %}
+	<div class="row">
+		<div class="col-md-12 forma_reg">
+	        <div class="card card-primary card-outline">
+	            <form action="" method="get">
+	                <div class="card-header row">
+	                    <div class="col-lg-4 pl pr">
+	                      <div class="forma_reg">
+	                        <span class="span-omo">Выберите компанию</span>&nbsp;&nbsp;
+	                        <select name="insurer" id="insurer" placeholder="..." class="form-control input-mini select-with-search">
+	                            <option value="">&nbsp</option>
+	                            {% for insurer in insurers %}
+	                                <option value="{{insurer.id}}" 
+	                                    {% is_selected insurer.id request.GET.insurer %}>
+	                                    {{insurer.title}}
+	                                </option>
+	                            {% endfor %}
+	                        </select>
+	                      </div>
+	                    </div>
+	                    <div class="col-lg-4 pl pr">
+	                      <div class="forma_reg">
+	                        <span class="span-omo">Выберите ЛПУ</span>&nbsp;&nbsp;
+	                        <select name="lpu" id="lpuN" placeholder="..." class="form-control input-mini select-with-search">
+	                            <option></option>
+	                        </select>
+	                      </div>
+	                    </div>
+	                </div>
+	            </form>
+	        </div>
+	    </div>
+		<div class="col-md-5">
+			{% for regiment in regiments %}
+				<p><a href="{% url 'tariffication:compulsory_package_list' parent regiment.id %}">{{regiment.title}}</a></p>
+			{% endfor %}
+		</div>
+		<div class="col-md-7">
+			{% for service_regiment in service_regiments %}
+				<p>
+					<input type="checkbox" name="" {% access_check request.GET.lpu %}>
+					<a href="">
+						{{service_regiment.service.title}}
+					</a>
+				</p>
+			{% endfor %}
+		</div>
+	</div>
+	
+{% endblock %}

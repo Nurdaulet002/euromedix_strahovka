@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+	<form method="GET">
+        <input type="text" name="title" placeholder="Поиск по наименованию профессии" value="{{ request.GET.title }}" class="form-control"><br>
+        <input type="submit" name="" value="Поиск..." class="btn btn-success">
+    </form>
+	<div class="col-md-12">
+		<br>
+		<button  class="btn btn-success btn-lg element input-mini" 
+    		data-url="{% url 'insurance:profession_create' %}" data-toggle="modal" data-target="#element" aria-hidden="true">
+				 добавить работника
+		</button>
+	</div>
+	<div class="col-md-12">
+		<br>
+		<table class="table table-hover table-bordered">
+			<thead class="thead-light">
+				<tr>
+					<th scope="col">Название</th>
+				</tr>
+			</thead>
+			<tbody id="content">
+				{% for profession in professions %}
+					<tr>
+						<td>{{profession.title}}</td>
+						<td>
+							<button  class="btn btn-info btn-lg element input-mini" 
+			            		data-url="{% url 'insurance:profession_update' profession.id %}" data-toggle="modal" data-target="#element" aria-hidden="true">
+									обнавить работника
+							</button>
+						</td>
+						<td>
+							<button  class="btn btn-danger btn-lg element input-mini" 
+			            		data-url="{% url 'insurance:profession_delete' profession.id %}" data-toggle="modal" data-target="#element" aria-hidden="true">
+									удалить работника
+							</button>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% include "pagination.html" %}
+	</div>
+</div>
+{% endblock %}
+
+{% block modal %}
+	<!-- Modal -->
+	<div class="modal fade" id="element" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">Добавить работника</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div id="element-id">
+	      	
+	      </div>
+	    </div>
+	  </div>
+	</div>
+{% endblock %}
+
+{% block domready %}
+ 	$(document).on("click", ".element", function() {
+ 		event.preventDefault()
+		var url = $(this).data('url')
+		$.ajax({
+            url: url,
+            type: 'GET',
+            data:{url: url},
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText)
+            },
+            success:function (data) {
+                $('#element-id').html(data)
+            }
+        })
+    });
+{% endblock %}

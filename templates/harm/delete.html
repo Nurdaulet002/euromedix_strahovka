@@ -1,0 +1,8 @@
+<form action="{{url}}" method="POST">
+	{% csrf_token %}
+	Вы точно хотите удалить?
+	<div class="modal-footer">
+		<button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+		<button class="btn btn-primary">Да удалить!</button>
+	</div>
+</form>

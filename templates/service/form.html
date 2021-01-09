@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% load widget_tweaks %}
+</head>
+<body>
+	<form action="{{url}}" method="POST">
+		{% csrf_token %}
+		<div class="container">
+			Название*<br>
+			{{form.title|add_class:"form-control"}}<br>
+			Код*<br>
+			{{form.code|add_class:"form-control"}}<br>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+				<button class="btn btn-primary">Сохранить</button>
+			</div>
+		</div>
+	</form>
+</body>
+</html>

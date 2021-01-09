@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% load widget_tweaks %}
+</head>
+<body>
+	<form action="{{url}}" method="POST">
+		{% csrf_token %}
+		<div class="container">
+			Название*<br>
+			{{form.title|add_class:"form-control"}}<br>
+			Адрес*
+			{{form.address|add_class:"form-control"}}<br>
+			майл*
+			{{form.email|add_class:"form-control"}}<br>
+			Телефоне номер*
+			{{form.phone|add_class:"form-control"}}<br>
+			Города*
+			{{form.city|add_class:"form-control"}}<br>
+			БИН*
+			{{form.bin|add_class:"form-control"}}<br>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+				<button class="btn btn-primary">Сохранить</button>
+			</div>
+		</div>
+	</form>
+</body>
+</html>

@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+{% load tariffication_tags %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12 forma_reg">
+        <div class="card card-primary card-outline">
+            <form action="" method="GET" id="search-package-form">
+                <div class="card-header row">
+                    <div class="col-lg-4 pl pr">
+                      <div class="forma_reg">
+                        <span class="span-omo">Выберите компанию</span>&nbsp;&nbsp;
+                        <select name="insurer" id="insurer" placeholder="..." class="form-control input-mini select-with-search search-package">
+                            <option value="">&nbsp</option>
+                            {% for insurer in insurers %}
+                                <option value="{{insurer.id}}" 
+                                    {% is_selected insurer.id insurer_id %}>
+                                    {{insurer.title}}
+                                </option>
+                            {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-lg-4 pl pr">
+                      <div class="forma_reg">
+                        <span class="span-omo">Выберите ЛПУ</span>&nbsp;&nbsp;
+                            <select name="lpu" id="lpuN" placeholder="..." class="form-control input-mini select-with-search search-package" data-url="{% url 'tariffication:tariffication_list' %}?insurer="+insurer>
+                                <option value="">&nbsp</option>
+                                    {% for hospital in hospitals %}
+                                        <option value="{{hospital.id}}"
+                                                {% is_selected hospital.id request.GET.lpu %}>
+                                            {{hospital.title}}
+                                        </option>
+                                    {% endfor %}
+                            </select>
+                      </div>
+                    </div>
+                    <div class="col-lg-4 pl pr">
+                      <div class="forma_reg">
+                        <span class="span-omo">Выберите доктора</span>&nbsp;&nbsp;
+                        <select name="doctor" id="doctor" placeholder="..." class="form-control input-mini search-package">
+                            <option></option>
+                        </select>
+                      </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+  <div class="col-md-12">
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    </div>
+    <div class="col-md-12">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <div class="btn-grup pull-right">
+                    <div class="btn-group">
+                        <select id="method" class="form-control input-mini">
+                            <option>
+                                15
+                            </option>
+                        </select>
+                    </div>
+
+                    <input type="button" id="add-complate-package" class="btn btn-primary input-mini" data-toggle="modal" data-target="#complatePackageModal" value="Добавить пакет">
+
+                    <input type="button" id="add-service" class="btn btn-success input-mini" data-toggle="modal" data-target="#serviceModal" value="Добавить услугу">
+
+
+                    <div class="btn-group">
+
+                        <button type="button" class="btn btn-info input-mini dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Создать пакет
+                        </button>
+
+                        <div class="dropdown-menu dropdown-menu-right" style="width: 250px;">
+                            <h6 class="dropdown-header">Название пакета</h6>
+
+                            <form class="px-4 py-6" action="{% condition_url 'service_group_create' parent %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="insurer" value="{{request.GET.insurer}}">
+                                <div class="form-group">
+                                    {{service_group_form.title}}
+                                </div>
+                                <input type="submit" class="btn btn-primary" value="Сохранить">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0 ">
+                <table class="table table-sm">
+                    <tbody id="content">
+                        {% for tariffication in tariffications %}
+                        <tr>
+                            <td>
+                                {% if tariffication.content_type.model == 'servicegroup' %}
+                                <a href="{% type_url tariffication.type tariffication.id %}?insurer={{request.GET.insurer}}">
+                                    {{tariffication.base_object.title}}
+                                </a>
+                                {% else %}
+                                {{tariffication.base_object.title}}
+                                {% endif %}
+                            </td>
+                            <td style="width: 150px">
+                                <input type="number" class="price-blur" placeholder="{{tariffication.price}}" data-id={{tariffication.id}}>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal service begin -->
+<div class="modal fade" id="serviceModal" tabindex="-1" role="dialog" aria-labelledby="serviceModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="serviceModalLabel">Добавить услуги</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+        <div class="modal-body">
+            <div class="">
+                    <div class="input-group input-group-sm">
+                      <input type="text" class="form-control search-service" placeholder="Поиск..." autocomplete="off" data-id={{tariffication.id}}><br>  <br>    
+                    </div><br>
+                <div id="service-content">
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+<!-- Modal service end -->
+
+<!-- Modal complate service begin -->
+<div class="modal fade" id="complatePackageModal" tabindex="-1" role="dialog" aria-labelledby="complatePackageModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="complatePackageModalLabel">Добавить</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+        <div class="modal-body">
+            <div class="">
+                <select name="insurer" id="insurer_ajax" placeholder="..." class="form-control input-mini select-with-search">
+                    <option value="">&nbsp</option>
+                    {% for insurer in insurers %}
+                        <option value="{{insurer.id}}" 
+                            {% is_selected insurer.id request.GET.insurer %}>
+                            {{insurer.title}}
+                        </option>
+                    {% endfor %}
+                </select><br>
+                <select name="lpu" id="lpu_ajax" placeholder="..." class="form-control input-mini select-with-search">
+                    <option value="">&nbsp</option>
+                        {% for hospital in hospitals %}
+                            <option value="{{hospital.id}}"
+                                    {% is_selected hospital.id request.GET.lpu %}>
+                                {{hospital.title}}
+                            </option>
+                        {% endfor %}
+                </select><br>
+                <div id="complate-package-content">
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal complate service end -->
+{% include "pagination.html" %}
+{% endblock %}
+{% block domready %}
+
+    // Получить список услуг
+    function get_service_list(page){
+        $.ajax({
+            headers: { "X-CSRFToken": csrftoken },
+            url: "{% url 'tariffication:service_ajax' %}",
+            type: 'GET',
+            data:{
+                page: page
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText)
+            },
+            success: function (data) {
+                $('#service-content').html(data)
+            }
+        })
+    }
+    
+    // Получить список готовых пакетов
+    function get_complate_package(url, page, insurer, lpu=""){
+        $.ajax({
+            headers: { "X-CSRFToken": csrftoken },
+            url: url,
+            type: 'GET',
+            data:{
+                page: page,
+                url: url,
+                insurer: insurer,
+                lpu: lpu
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText)
+            },
+            success: function (data) {
+                $('#complate-package-content').html(data)
+            }
+        })
+    }
+
+    // Получить список услуг
+    $(document).on('click', '#add-service', function(){
+        var page = $(this).data('page')
+        get_service_list(page)
+    })
+
+    // Пагинация
+    $(document).on('click', '.page-link', function(){
+        if($(this).closest('ul').hasClass('service_ajax')){
+            event.preventDefault()
+            var page = $(this).data('page')
+            get_service_list(page)
+        }
+        else if($(this).closest('ul').hasClass('tariffication_ajax')){
+            event.preventDefault()
+            var url = $('#tariffication-active-url').val()
+            var page = $(this).data('page')
+            var insurer = $('#insurer').val()
+            get_complate_package(url, page, insurer)
+        }
+    })
+
+    // Добавить или удалить  услугу
+    $(document).on('change', '.service', function(){
+        var id = $(this).data('id')
+        var insurer = $('#insurer').val()
+        $.ajax({
+            headers: { "X-CSRFToken": csrftoken },
+            url: "{% condition_url 'service_ajax' parent %}",
+            type: 'POST',
+            data:{
+                id: id,
+                insurer: insurer
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText)
+            },
+            success: function (data) {
+                console.log(data)
+                if(data.success){
+                    // alert(data)
+                }
+            }
+        })
+    })
+    
+    // Событие при выборе компании
+    $(document).on('change', '.search-package', function(){
+        $('#search-package-form').submit()
+    })
+
+    // Событие при выборе lpu
+        /*$(document).on('change', '#lpuN', function(){
+            var lpuN = $(this).val()
+            var insurer = $(this).val()
+            var url = "{% url 'tariffication:tariffication_list' %}"+ '?lpuN=' + lpuN
+            location.replace(url)
+        })*/
+    
+    // Событие при выборе компании для добавления пакета
+    $(document).on('change', '#insurer_ajax', function(){
+        var page = 1
+        var url = "{% url 'tariffication:tariffication_ajax' %}"
+        var insurer = $('#insurer_ajax').val()
+        get_complate_package(url, page, insurer)
+    })
+
+    // Событие при выборе компании для добавления пакета
+    $(document).on('change', '#lpu_ajax', function(){
+        var page = 1
+        var url = "{% url 'tariffication:tariffication_ajax' %}"
+        var lpu = $('#lpu_ajax').val()
+        get_complate_package(url, page, lpu)
+    })
+    
+    
+    // Получить список пакетов
+    $(document).on('click', '#add-complate-package', function(){
+        var page = 1
+        var url = "{% url 'tariffication:tariffication_ajax' %}"
+        var insurer = $('#insurer').val()
+        get_complate_package(url, page, insurer)
+    })
+    
+    
+    $(document).on('click', '.open-complate-package', function(){
+        event.preventDefault()
+        var page = 1
+        var url = $(this).attr('href')
+        var insurer = $('#insurer_ajax').val()
+        get_complate_package(url, page, insurer)
+    })
+
+    $(document).on('change', '.tariffication', function(){
+        var id = $(this).data('id')
+        var insurer = $('#insurer').val()
+        var lpu = $('#lpuN').val()
+        $.ajax({
+            headers: { "X-CSRFToken": csrftoken },
+            url: "{% url 'tariffication:tariffication_ajax' %}?insurer="+insurer +'&lpu='+lpu,
+            type: 'POST',
+            data:{
+                id: id
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText)
+            },
+            success: function (data) {
+                console.log(data)
+                //alert(data)
+            }
+        })
+    })
+    
+    $(document).on('change', '.tariffication', function(){
+        var id = $(this).data('id')
+        var insurer = $('#insurer').val()
+        var lpu = $('#lpuN').val()
+        $.ajax({
+            headers: { "X-CSRFToken": csrftoken },
+            url: "{% url 'tariffication:tariffication_ajax' %}?insurer="+insurer +'&lpu='+lpu,
+            type: 'POST',
+            data:{
+                id: id
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText)
+            },
+            success: function (data) {
+                console.log(data)
+                //alert(data)
+            }
+        })
+    })
+
+    $(document).on('blur', '.price-blur', function(){
+    var id = $(this).data('id')
+    var price = $(this).val()
+        $.ajax({
+            url: "{% url 'tariffication:tariffication_ajax_update' %}",
+            type: 'POST',
+            data:{
+                id: id,
+                price: price
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText)
+            },
+            success: function (data) {
+                console.log(data)
+                //alert(data)
+            }
+        })
+    })
+
+    $(document).on('input', '.search-service', function(){
+        var search = $(this).val()
+        $.ajax({
+            url: "{% url 'tariffication:service_ajax' %}",
+            type: 'GET',
+            data:{
+                search: search
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText)
+            },
+            success: function (data) {
+                $('#service-content').html(data)
+            }
+        })
+    })
+{% endblock %}

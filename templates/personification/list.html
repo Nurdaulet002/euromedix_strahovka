@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% load tariffication_tags %}
+{% block content %}
+<div class="row">
+	<div class="col-md-12 forma_reg">
+        <div class="card card-primary card-outline">
+            <form action="" method="get" id="search-package-form">
+                <div class="card-header row">
+                    <div class="col-lg-4 pl pr">
+                      <div class="forma_reg">
+                        <span class="span-omo">Выберите компанию</span>&nbsp;&nbsp;
+                        <select name="insurer" placeholder="..." class="form-control input-mini select-with-search">
+                            <option value="">&nbsp</option>
+
+                            {% for insurer in insurers %}
+                                <option value="{{insurer.id}}" 
+                                    {% is_selected insurer.id request.GET.insurer %}
+                                    data-url = "{% url 'insurance:personification_list' insurer.id %}">
+                                    {{insurer.title}}
+                                </option>
+                            {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-lg-4 pl pr">
+                      <div class="forma_reg">
+                        <span class="span-omo">Выберите подразделение компанию</span>&nbsp;&nbsp;
+                        <select name="lpu" placeholder="..." class="form-control input-mini select-with-search">
+                            <option>
+                            	{% for insurer in insurers %}profession
+		                        	{% for profession in insurer.profession.all %}
+	                                <option value="{{insurer.id}}" 
+	                                    {% is_selected insurer.id request.GET.lpu %}>
+	                                    {{profession.title}}
+	                                </option>
+	                                {% endfor %}
+	                            {% endfor %}
+                            </option>
+                        </select>
+                      </div>
+                    </div>
+	                <div class="col-lg-4 pl pr">
+	                	{% if request.GET.insurer %}
+			            	<div class="forma_reg">
+			            		<button  class="btn btn-success btn-lg element input-mini" 
+			            		data-url="{% url 'insurance:personification_create' insurer=request.GET.insurer %}" data-toggle="modal" data-target="#element" aria-hidden="true">
+									добавить работника
+								</button>
+			            	</div>
+		            	{% endif %}
+		            </div>
+                </div>
+            </form>
+        </div>
+    </div>
+	    {% if request.GET.insurer %}
+	    <form method="GET">
+			<div class="container">
+		        <input type="text" name="last_name" placeholder="Поиск по фамилии" value="{{ request.GET.last_name }}">
+		        <input type="text" name="first_name" placeholder="Поиск по имени" value="{{ request.GET.first_name }}">
+		        <input type="submit" name="" value="Поиск...">
+	        </div>
+	    </form>
+		<div class="col-md-12">
+			<table class="table table-hover table-bordered">
+				<thead class="thead-light">
+					<tr>
+						<th scope="col">ФИО работника</th>
+						<th scope="col">ИИН</th>
+						<th scope="col">Вредности</th>
+						<th scope="col">Услуги</th>
+						<th scope="col">Пол</th>
+						<th scope="col">Профессия</th>
+					</tr>
+				</thead>
+				<tbody id="content">
+					
+						{% for personification in personifications %}
+							<tr>
+								<td>{{personification.full_name}}</td>
+								<td>{{personification.iin}}</td>
+								<td>
+									{% for harm in personification.profession.harm_set.all %}
+										{{harm.title}} <br>
+									{% endfor %}
+								</td>
+								<td>
+									{% for harm in personification.profession.harm_set.all %}
+										{% for service in harm.services.all %}
+											{{service.title}}<br>
+										{% endfor %}
+									{% endfor %}
+								</td>
+								<td>{{personification.gender}}</td>
+								<td>{{personification.profession}}</td>
+								<td>
+								<button  class="btn btn-info btn-lg element input-mini" 
+			            		data-url="{% url 'insurance:personification_update' request.GET.insurer personification.id %}" data-toggle="modal" data-target="#element" aria-hidden="true">
+									обнавить работника
+								</button>
+								</td>
+								<td>
+								<button  class="btn btn-danger btn-lg element input-mini" 
+			            		data-url="{% url 'insurance:personification_delete' request.GET.insurer personification.id %}" data-toggle="modal" data-target="#element" aria-hidden="true">
+									удалить работника
+								</button>
+								</td>
+							</tr>
+						{% endfor %}
+
+				</tbody>
+			</table>
+			{% include "pagination.html" %}
+		</div>
+	{% else %}
+	{% endif %}
+</div>
+{% endblock %}
+
+{% block modal %}
+	<!-- Modal -->
+	<div class="modal fade" id="element" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">Добавить работника</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div id="element-id">
+	      	
+	      </div>
+	    </div>
+	  </div>
+	</div>
+{% endblock %}
+
+{% block domready %}
+	$(document).on("change", ".select-with-search", function() {
+    	 $('#search-package-form').submit()
+ 	})
+
+
+ 	$(document).on("click", ".element", function() {
+ 		event.preventDefault()
+		var url = $(this).data('url')
+		$.ajax({
+            url: url,
+            type: 'GET',
+            data:{url: url},
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText)
+            },
+            success:function (data) {
+                $('#element-id').html(data)
+            }
+        })
+    });
+{% endblock %}

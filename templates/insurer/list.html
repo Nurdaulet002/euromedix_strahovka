@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+	<div class="col-md-8">
+		<table class="table table-hover table-bordered">
+			<thead class="thead-light">
+				<tr>
+					<th scope="col">Название компании</th>
+					<th scope="col"></th>
+				</tr>
+			</thead>
+			<tbody id="content">
+				{% for insurer in insurers %}
+					<tr>
+						<td>{{insurer.title}}</td>
+						<td>
+							<a href="{% url 'insurance:insurer_list' insurer.id %}">Выбрать</a> <br>
+							<a href="">Редактировать</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	<div class="col-md-4">Информация</div>
+</div>
+{% endblock %}

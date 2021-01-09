@@ -1,0 +1,13 @@
+<table class="table table-pad-one">
+	<tbody>
+	    {% for service in page_obj %}
+			<tr>
+				<td>
+					<input type="checkbox" class="service" name="service" data-id="{{service.id}}">
+					{{service}}
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% include "pagination.html" %}

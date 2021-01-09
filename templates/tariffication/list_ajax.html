@@ -1,0 +1,21 @@
+{% load tariffication_tags %}
+<table class="table table-pad-one">
+	<tbody>
+		<input type="hidden" id="tariffication-active-url" value="{{request.GET.url}}">
+	    {% for tariffication in page_obj %}
+			<tr>
+				<td>
+					{% if tariffication.content_type.model == 'servicegroup' %}
+					<input type="checkbox" class="tariffication" name="tariffication" data-id="{{tariffication.id}}">
+                        <a href="{% url 'tariffication:tariffication_ajax' tariffication.id %}" class="open-complate-package">
+                            {{tariffication.base_object.title}}
+                        </a>
+                    {% else %}
+                        {{tariffication.base_object.title}}
+                    {% endif %}
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% include "pagination.html" %}
